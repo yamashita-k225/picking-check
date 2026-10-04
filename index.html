@@ -42,7 +42,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
 <script>
 // ★ここに、Apps Scriptのウェブアプリ URL（/exec で終わるもの）を入れる
-const API_URL = "ここにURLを貼り付け";
+const API_URL = "https://script.google.com/macros/s/AKfycbzcnbxYctMOYa07qkPmSprKMhA4iSbN5mwnJqrd6Hc5OkIdk6ia79R7OSxlUhg45Xyn/exec";
 
 const courseEl = document.getElementById("course");
 try { courseEl.value = localStorage.getItem("course") || courseEl.value; } catch (e) {}
@@ -89,12 +89,27 @@ async function onScan(jan) {
 
 document.getElementById("start").addEventListener("click", async () => {
   const scanner = new Html5Qrcode("reader", {
-    formatsToSupport: [Html5QrcodeSupportedFormats.EAN_13]
+    formatsToSupport: [
+      Html5QrcodeSupportedFormats.EAN_13,
+      Html5QrcodeSupportedFormats.EAN_8,
+      Html5QrcodeSupportedFormats.UPC_A
+    ],
+    experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+    verbose: false
   });
   try {
     await scanner.start(
       { facingMode: "environment" },
-      { fps: 10, qrbox: { width: 280, height: 120 } },
+      {
+        fps: 15,
+        qrbox: (w, h) => ({ width: Math.floor(w * 0.92), height: Math.floor(Math.min(h, w) * 0.5) }),
+        videoConstraints: {
+          facingMode: "environment",
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+          advanced: [{ focusMode: "continuous" }]
+        }
+      },
       onScan
     );
     document.getElementById("start").style.display = "none";
